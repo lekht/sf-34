@@ -9,6 +9,12 @@ import (
 )
 
 func main() {
+	// Можно бы было при необходимости реализовать сканер, для чтения с консоли,
+	// а весь нижележащий код завернуть в функцию с двумя входными аргументами,
+	// но будет круто, если это не будет учитываться, тк
+	// в самом модуле присутсвовали ошибки и тавтология (могу отдельно указать в каких местах)
+
+	// первый аргумент
 	filenameRead := "./tasks.txt"
 	f1, err := os.OpenFile(filenameRead, os.O_RDONLY, 0777)
 	if err != nil {
@@ -17,6 +23,7 @@ func main() {
 	defer f1.Close()
 
 	fileReader := bufio.NewReader(f1)
+	// второй аргумент
 	filenameWrite := "./results.txt"
 	_ = os.Remove(filenameWrite)
 	f2, err := os.OpenFile(filenameWrite, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
@@ -24,20 +31,20 @@ func main() {
 		panic(err)
 	}
 	defer f2.Close()
-
+	writer := bufio.NewWriter(f2)
 	for {
 		line, _, err := fileReader.ReadLine()
 		if err != nil {
 			break
 		}
-		// fmt.Println("NEW LINE:", string(line))
 		s, ok := regexFilter(string(line))
 		if !ok {
 			continue
 		}
 		fmt.Println(s)
-		_, _ = f2.WriteString(s + "\n")
+		_, _ = writer.WriteString(s + "\n")
 	}
+	writer.Flush()
 }
 
 func regexFilter(s string) (string, bool) {
